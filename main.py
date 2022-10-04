@@ -88,9 +88,10 @@ def main():
         
         tracks.append(track_string)
         
+    print("\n\n")
     
     for track in tracks:
-        print(f"Dowinloading {track}...")
+        print(f"Downloading \'{track}\'...")
         download_song(track)
     
     print("\n\nDone.\n\n")
