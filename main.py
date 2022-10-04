@@ -6,8 +6,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
 import json
-import pytube
+import youtube_dl
 from decouple import config
+import asyncio
 
 
 os.environ["SPOTIPY_CLIENT_ID"] = config('SPOTIPY_CLIENT_ID')
@@ -16,7 +17,29 @@ os.environ["SPOTIPY_REDIRECT_URI"] = config('SPOTIPY_REDIRECT_URI')
 
 
 
+youtube_dl.utils.bug_reports_message = lambda: ''
 
+ytdl_format_options = {
+    'format': 'bestaudio/best',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+}
+
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+
+def download_song(track_name):
+    data = ytdl.extract_info(track_name, download=True)
+    if 'entries' in data:
+        # take first item from a playlist
+        data = data['entries'][0]
 
 def main():
 
@@ -65,11 +88,12 @@ def main():
         
         tracks.append(track_string)
         
-    print(tracks)
     
+    for track in tracks:
+        print(f"Dowinloading {track}...")
+        download_song(track)
     
-    
-
+    print("\n\nDone.\n\n")
 
         
         
