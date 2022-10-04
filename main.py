@@ -1,32 +1,76 @@
+from ctypes.wintypes import tagRECT
 from re import M
+from unicodedata import name
+from xml.dom.minidom import TypeInfo
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
 import json
+import pytube
+from decouple import config
 
 
-os.environ["SPOTIPY_CLIENT_ID"] = "7489e150d7744a22a259dac64438a44c"
-os.environ["SPOTIPY_CLIENT_SECRET"] = "befe11f551954ab8bfd9d8acd925df84"
-os.environ["SPOTIPY_REDIRECT_URI"] = "https://github.com/Keatsm/spotifymp3"
+os.environ["SPOTIPY_CLIENT_ID"] = config('SPOTIPY_CLIENT_ID')
+os.environ["SPOTIPY_CLIENT_SECRET"] = config('SPOTIPY_CLIENT_SECRET')
+os.environ["SPOTIPY_REDIRECT_URI"] = config('SPOTIPY_REDIRECT_URI')
+
+
+
 
 
 def main():
-    scope = "user-library-read"
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
-    
-    
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-library-read"))
 
     results = sp.current_user_playlists()
-    
-    for playlist in results:
-        print(playlist)
-    
+
+        
+    playlists = results['items']
+    while results['next']:
+        results = sp.next(results)
+        playlists.extend(results['items'])
 
     
-    # for idx, item in enumerate(results['items']):
-    #     track = item['track']
-    #     print(idx, track['artists'][0]['name'], " – ", track['name'])
+    for playlist in playlists:
+        print(playlist["name"])
+        
+        
+    target_playlist = None
+    while target_playlist is None:
+        playlist_name = input("Select a playlist: ")
+        
+        for playlist in playlists:
+            if playlist["name"] == playlist_name:
+                target_playlist = playlist
+                
+        try: target_playlist
+        except NameError: target_playlist = None
+    
+    
+    playlist = target_playlist
+    
+    
+    tracks = []
+    
+    result = sp.playlist_tracks(playlist["id"])
+    for item in result["items"]:
+        track_string = ""
+        for artist in item["track"]["artists"]:
+            artist_name = artist["name"]
+            track_string += f"{artist_name} "
+        
+        track_name = item["track"]["name"]
+        
+        track_string += f"- {track_name}"
+        
+        tracks.append(track_string)
+        
+    print(tracks)
+    
+    
+    
+
+
         
         
 if __name__ == '__main__':
