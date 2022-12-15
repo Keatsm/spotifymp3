@@ -1,14 +1,8 @@
-from ctypes.wintypes import tagRECT
-from re import M
-from unicodedata import name
-from xml.dom.minidom import TypeInfo
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
-import json
 import youtube_dl
 from decouple import config
-import asyncio
 
 
 os.environ["SPOTIPY_CLIENT_ID"] = config('SPOTIPY_CLIENT_ID')
@@ -21,6 +15,11 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
     'restrictfilenames': True,
     'noplaylist': True,
     'nocheckcertificate': True,
@@ -89,6 +88,19 @@ def main():
         tracks.append(track_string)
         
     print("\n\n")
+    os.chdir('./Playlists')
+    
+    directory = target_playlist["name"]
+    
+    # Parent Directory path 
+    parent_dir = os.getcwd()
+        
+    # Path 
+    path = os.path.join(parent_dir, directory)
+    
+    os.mkdir(path)
+    
+    os.chdir(path)
     
     for track in tracks:
         print(f"Downloading \'{track}\'...")
