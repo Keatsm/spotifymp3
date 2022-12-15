@@ -39,23 +39,29 @@ def download_song(track_name):
     if 'entries' in data:
         # take first item from a playlist
         data = data['entries'][0]
+        
+        
+def create_and_change_dir(dirname):
+    directory = dirname
+    parent_dir = os.getcwd()
+    path = os.path.join(parent_dir, directory)
+    if not os.path.exists(path): 
+        os.mkdir(path)
+    os.chdir(path)
 
 def main():
 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-library-read"))
 
     results = sp.current_user_playlists()
-
         
     playlists = results['items']
     while results['next']:
         results = sp.next(results)
         playlists.extend(results['items'])
 
-    
     for playlist in playlists:
         print(playlist["name"])
-        
         
     target_playlist = None
     while target_playlist is None:
@@ -68,9 +74,7 @@ def main():
         try: target_playlist
         except NameError: target_playlist = None
     
-    
     playlist = target_playlist
-    
     
     tracks = []
     
@@ -88,19 +92,9 @@ def main():
         tracks.append(track_string)
         
     print("\n\n")
-    os.chdir('./Playlists')
     
-    directory = target_playlist["name"]
-    
-    # Parent Directory path 
-    parent_dir = os.getcwd()
-        
-    # Path 
-    path = os.path.join(parent_dir, directory)
-    
-    os.mkdir(path)
-    
-    os.chdir(path)
+    create_and_change_dir("Playlists")
+    create_and_change_dir(target_playlist["name"])
     
     for track in tracks:
         print(f"Downloading \'{track}\'...")
